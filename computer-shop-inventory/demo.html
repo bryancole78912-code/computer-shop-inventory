@@ -1,0 +1,2658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechStock - Computer Shop Inventory Management System</title>
+    <link rel="icon" type="image/png" href="assets/images/logo_icon_badge.png">
+    <!-- Bootstrap 5 CSS & Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-main: transparent;
+            --bg-space: #04060f;
+            --bg-card: rgba(13, 20, 38, 0.72);
+            --bg-card-header: rgba(18, 27, 49, 0.85);
+            --bg-sidebar: rgba(9, 13, 26, 0.88);
+            --bg-sidebar-hover: rgba(30, 41, 59, 0.7);
+            --bg-input: rgba(15, 23, 42, 0.75);
+            
+            --border-color: rgba(147, 197, 253, 0.15);
+            --border-glow: rgba(56, 189, 248, 0.35);
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            
+            --primary: #38bdf8;
+            --primary-glow: rgba(56, 189, 248, 0.4);
+            --accent: #a855f7;
+            
+            --success: #34d399;
+            --success-bg: rgba(16, 185, 129, 0.18);
+            --success-border: rgba(16, 185, 129, 0.35);
+
+            --warning: #fbbf24;
+            --warning-bg: rgba(245, 158, 11, 0.18);
+            --warning-border: rgba(245, 158, 11, 0.35);
+
+            --danger: #f87171;
+            --danger-bg: rgba(239, 68, 68, 0.18);
+            --danger-border: rgba(239, 68, 68, 0.35);
+
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --shadow-card: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+            --shadow-glow: 0 0 20px rgba(56, 189, 248, 0.2);
+        }
+
+        body {
+            background-color: #030712;
+            background-image: 
+                radial-gradient(circle at 18% 22%, rgba(56, 189, 248, 0.16) 0%, transparent 42%),
+                radial-gradient(circle at 82% 28%, rgba(168, 85, 247, 0.15) 0%, transparent 45%),
+                radial-gradient(circle at 50% 65%, rgba(99, 102, 241, 0.12) 0%, transparent 50%),
+                radial-gradient(circle at 78% 85%, rgba(14, 165, 233, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 22% 82%, rgba(236, 72, 153, 0.08) 0%, transparent 42%);
+            background-attachment: fixed;
+            background-size: cover;
+            background-repeat: no-repeat;
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            overflow-x: hidden;
+        }
+
+        /* Static Galaxy Starfield Canvas Layer */
+        #galaxyStarsCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Layout */
+        .sidebar {
+            width: 260px;
+            background: var(--bg-sidebar);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            min-height: 100vh;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .sidebar-brand {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--border-subtle);
+            text-decoration: none;
+            color: #ffffff;
+        }
+
+        .sidebar-brand i {
+            font-size: 1.6rem;
+            color: #38bdf8;
+            filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.6));
+        }
+
+        .sidebar-brand .text-white {
+            color: #ffffff !important;
+        }
+
+        .sidebar-brand .text-secondary {
+            color: #94a3b8 !important;
+        }
+
+        .sidebar-nav {
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex-grow: 1;
+        }
+
+        .sidebar-section-title {
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 0.09em;
+            color: #64748b;
+            padding: 12px 12px 6px;
+            font-weight: 700;
+        }
+
+        .nav-link-custom {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            color: #94a3b8;
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link-custom i {
+            font-size: 1.15rem;
+            width: 20px;
+            text-align: center;
+            color: #94a3b8;
+            transition: color 0.2s;
+        }
+
+        .nav-link-custom:hover {
+            color: #ffffff;
+            background: var(--bg-sidebar-hover);
+        }
+
+        .nav-link-custom:hover i {
+            color: #38bdf8;
+        }
+
+        .nav-link-custom.active {
+            color: #ffffff;
+            background: linear-gradient(90deg, rgba(56, 189, 248, 0.2) 0%, rgba(168, 85, 247, 0.1) 100%);
+            border-left: 3px solid #38bdf8;
+            font-weight: 600;
+        }
+
+        .nav-link-custom.active i {
+            color: #38bdf8;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            background: transparent;
+        }
+
+        .top-navbar {
+            height: 64px;
+            background: rgba(10, 15, 30, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .page-container {
+            padding: 24px;
+            flex-grow: 1;
+        }
+
+        /* Glassmorphism Cards */
+        .card-custom {
+            background: var(--bg-card);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-card);
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card-custom:hover {
+            border-color: var(--border-glow);
+            box-shadow: 0 12px 38px 0 rgba(0, 0, 0, 0.55), var(--shadow-glow);
+        }
+
+        .card-custom-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-card-header);
+            border-top-left-radius: var(--radius-lg);
+            border-top-right-radius: var(--radius-lg);
+        }
+
+        .stat-card {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.45rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-icon.primary { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border-color: rgba(56, 189, 248, 0.3); }
+        .stat-icon.success { background: var(--success-bg); color: var(--success); border-color: var(--success-border); }
+        .stat-icon.warning { background: var(--warning-bg); color: var(--warning); border-color: var(--warning-border); }
+        .stat-icon.danger  { background: var(--danger-bg);  color: var(--danger);  border-color: var(--danger-border); }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            line-height: 1.2;
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* Cosmic Status Badges */
+        .badge-status {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.74rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .badge-in-stock {
+            background: var(--success-bg);
+            color: var(--success);
+            border: 1px solid var(--success-border);
+        }
+
+        .badge-low-stock {
+            background: var(--warning-bg);
+            color: var(--warning);
+            border: 1px solid var(--warning-border);
+            animation: stellar-pulse 2s infinite;
+        }
+
+        .badge-out-of-stock {
+            background: var(--danger-bg);
+            color: var(--danger);
+            border: 1px solid var(--danger-border);
+        }
+
+        .badge-role {
+            text-transform: uppercase;
+            font-size: 0.68rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        .badge-role.admin { background: #7c3aed; color: #ffffff; box-shadow: 0 0 10px rgba(124, 58, 237, 0.4); }
+        .badge-role.staff { background: #0284c7; color: #ffffff; box-shadow: 0 0 10px rgba(2, 132, 199, 0.4); }
+        .badge-role.auditor { background: #334155; color: #ffffff; }
+
+        @keyframes stellar-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        /* Tables */
+        .table-custom {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            color: var(--text-primary);
+        }
+
+        .table-custom th {
+            background: rgba(15, 23, 42, 0.85);
+            color: var(--text-secondary);
+            font-size: 0.76rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 13px 16px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+        }
+
+        .table-custom td {
+            padding: 13px 16px;
+            border-bottom: 1px solid var(--border-subtle);
+            font-size: 0.9rem;
+            vertical-align: middle;
+            color: #f8fafc;
+        }
+
+        .table-custom tbody tr {
+            transition: background 0.15s ease;
+        }
+
+        .table-custom tbody tr:hover {
+            background: rgba(56, 189, 248, 0.06);
+        }
+
+        /* Form Controls */
+        .form-control-custom, .form-select-custom {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: #ffffff;
+            border-radius: var(--radius-md);
+            padding: 9px 14px;
+            font-size: 0.9rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+
+        .form-control-custom:focus, .form-select-custom:focus {
+            background: rgba(18, 27, 49, 0.9);
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
+            color: #ffffff;
+            outline: none;
+        }
+
+        .form-select-custom option {
+            background: #0d1527;
+            color: #ffffff;
+        }
+
+        /* Cosmic Buttons */
+        .btn-cyber-primary {
+            background: linear-gradient(135deg, #0284c7 0%, #6366f1 100%);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            font-weight: 600;
+            padding: 9px 18px;
+            border-radius: var(--radius-md);
+            transition: all 0.2s ease;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+        }
+
+        .btn-cyber-primary:hover {
+            filter: brightness(1.15);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.45);
+            color: #ffffff;
+        }
+
+        .btn-cyber-success {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            font-weight: 600;
+            padding: 9px 18px;
+            border-radius: var(--radius-md);
+            transition: all 0.2s ease;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+        }
+
+        .btn-cyber-success:hover {
+            filter: brightness(1.15);
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.45);
+            color: #ffffff;
+        }
+
+        .btn-outline-secondary {
+            border-color: var(--border-color);
+            color: #cbd5e1;
+            background: rgba(15, 23, 42, 0.4);
+        }
+
+        .btn-outline-secondary:hover {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: #94a3b8;
+            color: #ffffff;
+        }
+
+        .btn-outline-info {
+            border-color: #38bdf8;
+            color: #38bdf8;
+            background: rgba(56, 189, 248, 0.08);
+        }
+
+        .btn-outline-info:hover {
+            background: #38bdf8;
+            color: #0f172a;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+        }
+
+        .btn-outline-dark {
+            border-color: rgba(255, 255, 255, 0.2);
+            color: #f8fafc;
+            background: rgba(15, 23, 42, 0.5);
+        }
+
+        .btn-outline-dark:hover {
+            background: rgba(30, 41, 59, 0.9);
+            color: #ffffff;
+        }
+
+        /* Modals */
+        .modal-content-custom {
+            background: rgba(13, 20, 38, 0.94);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--border-glow);
+            border-radius: var(--radius-lg);
+            color: #ffffff;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+        }
+
+        .modal-header-custom {
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 24px;
+            background: rgba(18, 27, 49, 0.8);
+        }
+
+        .modal-footer-custom {
+            border-top: 1px solid var(--border-color);
+            padding: 16px 24px;
+            background: rgba(18, 27, 49, 0.8);
+        }
+
+        /* App Wrapper */
+        .app-wrapper {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        /* 3D Galaxy Login View */
+        .login-view-container {
+            width: 100vw;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .login-box {
+            width: 100%;
+            max-width: 530px;
+            background: rgba(13, 20, 38, 0.90);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            border-radius: 22px;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.85), 0 0 35px rgba(56, 189, 248, 0.25);
+            color: #ffffff;
+            overflow: hidden;
+            animation: fadeInLogin 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeInLogin {
+            from {
+                opacity: 0;
+                transform: translateY(22px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .pc-setup-badge {
+            width: 76px;
+            height: 76px;
+            margin: 0 auto 12px;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.25) 0%, rgba(13, 20, 38, 0.85) 70%);
+            border: 2px solid rgba(56, 189, 248, 0.5);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.45), inset 0 0 15px rgba(56, 189, 248, 0.25);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .pc-setup-badge:hover {
+            transform: scale(1.06);
+            box-shadow: 0 0 35px rgba(56, 189, 248, 0.7), inset 0 0 20px rgba(56, 189, 248, 0.35);
+        }
+
+        .pc-setup-badge i {
+            font-size: 2.7rem;
+            color: #38bdf8;
+            filter: drop-shadow(0 0 14px rgba(56, 189, 248, 0.85));
+        }
+
+        .brand-hero-box {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 12px;
+            border-radius: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .brand-hero-box:hover {
+            transform: scale(1.03);
+        }
+
+        .brand-hero-img {
+            max-width: 290px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            filter: drop-shadow(0 0 22px rgba(56, 189, 248, 0.5));
+        }
+
+        .sidebar-brand-icon {
+            width: 36px;
+            height: 36px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.7));
+            transition: transform 0.25s ease;
+        }
+
+        .sidebar-brand:hover .sidebar-brand-icon {
+            transform: scale(1.08) rotate(4deg);
+        }
+
+        .role-cards-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .role-select-card {
+            background: rgba(15, 23, 42, 0.82);
+            border: 1px solid rgba(147, 197, 253, 0.18);
+            border-radius: 14px;
+            padding: 14px 16px;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+
+        .role-select-card:hover {
+            background: rgba(23, 33, 56, 0.92);
+        }
+
+        .role-card-admin:focus-within, .role-card-admin:hover {
+            border-color: rgba(56, 189, 248, 0.75);
+            box-shadow: 0 4px 22px rgba(56, 189, 248, 0.3);
+        }
+
+        .role-card-audit:focus-within, .role-card-audit:hover {
+            border-color: rgba(245, 158, 11, 0.75);
+            box-shadow: 0 4px 22px rgba(245, 158, 11, 0.3);
+        }
+
+        .role-card-staff:focus-within, .role-card-staff:hover {
+            border-color: rgba(16, 185, 129, 0.75);
+            box-shadow: 0 4px 22px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-xs {
+            font-size: 0.73rem;
+            padding: 0.2rem 0.55rem;
+            border-radius: 6px;
+        }
+
+        .role-icon-box {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.15rem;
+            flex-shrink: 0;
+        }
+
+        .role-sub {
+            font-size: 0.72rem;
+            color: #94a3b8;
+        }
+
+        .role-desc {
+            font-size: 0.78rem;
+            color: #cbd5e1;
+            margin-top: 3px;
+            line-height: 1.35;
+        }
+
+        .badge-role.auditor, .badge-role.audit {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fcd34d;
+            border: 1px solid rgba(245, 158, 11, 0.4);
+        }
+
+        .cursor-pointer {
+            cursor: pointer;
+        }
+
+        @media print {
+            #galaxyStarsCanvas, #loginView { display: none !important; }
+            .sidebar, .top-navbar, .btn, .no-print { display: none !important; }
+            body { background: #ffffff !important; color: #000000 !important; }
+            .card-custom { border: 1px solid #d1d5db !important; background: #ffffff !important; box-shadow: none !important; }
+            .table-custom th, .table-custom td { color: #000000 !important; border-color: #e5e7eb !important; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 3D Galaxy Canvas Layer -->
+<canvas id="galaxyStarsCanvas"></canvas>
+
+<!-- ========================================== -->
+<!-- 3D GALAXY LOGIN PORTAL                     -->
+<!-- ========================================== -->
+<div id="loginView" class="login-view-container">
+    <div class="login-box p-4 p-md-5">
+        <!-- Brand Header with New TechStock Logo -->
+        <div class="text-center mb-4">
+            <div class="brand-hero-box mb-2">
+                <img src="assets/images/logo_full_darkmode.png" alt="TECHSTOCK Computer Shop Inventory" class="brand-hero-img" onerror="this.onerror=null; this.src='assets/images/logo_full_badge.png';">
+            </div>
+            <div class="text-info small fw-semibold text-uppercase tracking-wider">Computer Hardware & Peripherals Portal</div>
+            <div class="mt-2 text-secondary small">
+                <span><i class="bi bi-person-badge text-info me-1"></i> Bryan Cahayag Cole</span>
+            </div>
+        </div>
+
+        <div class="mb-3 text-center">
+            <span class="badge bg-dark bg-opacity-75 border border-secondary text-info small px-3 py-1 text-uppercase tracking-wider">
+                <i class="bi bi-shield-lock me-1"></i> Enter Password to Access Role
+            </span>
+        </div>
+
+        <!-- 3 Role Password Cards Grid -->
+        <div class="role-cards-grid">
+            <!-- 1. Admin Role Card -->
+            <div class="role-select-card role-card-admin">
+                <div class="d-flex align-items-center justify-content-between mb-1">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="role-icon-box bg-info bg-opacity-25 text-info">
+                            <i class="bi bi-shield-lock-fill"></i>
+                        </span>
+                        <div>
+                            <div class="fw-bold text-white">Administrator</div>
+                            <div class="role-sub text-secondary">Bryan Cahayag Cole (Full Control)</div>
+                        </div>
+                    </div>
+                    <span class="badge-role admin">ADMIN</span>
+                </div>
+                <div class="role-desc">Full System Oversight, Catalog, Stock Operations, Users & CSV Export</div>
+                
+                <form onsubmit="handleRolePasswordLogin(event, 'admin')" class="mt-3">
+                    <div class="input-group input-group-sm mb-2">
+                        <span class="input-group-text bg-dark border-secondary text-info"><i class="bi bi-key-fill"></i></span>
+                        <input type="password" id="passAdmin" class="form-control form-control-custom" placeholder="Enter Admin Password" required autocomplete="current-password">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="togglePassVisibility('passAdmin', this)" title="Show/Hide Password">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    <div id="errorAdmin" class="alert alert-danger py-1 px-2 small mb-2" style="display: none; font-size: 0.78rem;"></div>
+                    <button type="submit" class="btn btn-sm btn-cyber-primary w-100 py-2">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Sign In as Admin
+                    </button>
+                </form>
+            </div>
+
+            <!-- 2. Audit Role Card -->
+            <div class="role-select-card role-card-audit">
+                <div class="d-flex align-items-center justify-content-between mb-1">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="role-icon-box bg-warning bg-opacity-25 text-warning">
+                            <i class="bi bi-clipboard2-check-fill"></i>
+                        </span>
+                        <div>
+                            <div class="fw-bold text-white">Auditor</div>
+                            <div class="role-sub text-secondary">Prof. Noel Montecillo (Inspection)</div>
+                        </div>
+                    </div>
+                    <span class="badge-role auditor">AUDIT</span>
+                </div>
+                <div class="role-desc">Read-Only Audit Trail, Stock Verification, Low-Stock Tracking & Reports</div>
+                
+                <form onsubmit="handleRolePasswordLogin(event, 'auditor')" class="mt-3">
+                    <div class="input-group input-group-sm mb-2">
+                        <span class="input-group-text bg-dark border-secondary text-warning"><i class="bi bi-key-fill"></i></span>
+                        <input type="password" id="passAuditor" class="form-control form-control-custom" placeholder="Enter Audit Password" required autocomplete="current-password">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="togglePassVisibility('passAuditor', this)" title="Show/Hide Password">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    <div id="errorAuditor" class="alert alert-danger py-1 px-2 small mb-2" style="display: none; font-size: 0.78rem;"></div>
+                    <button type="submit" class="btn btn-sm btn-outline-warning w-100 py-2">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Sign In as Audit
+                    </button>
+                </form>
+            </div>
+
+            <!-- 3. Staff Role Card -->
+            <div class="role-select-card role-card-staff">
+                <div class="d-flex align-items-center justify-content-between mb-1">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="role-icon-box bg-success bg-opacity-25 text-success">
+                            <i class="bi bi-boxes"></i>
+                        </span>
+                        <div>
+                            <div class="fw-bold text-white">Inventory Staff</div>
+                            <div class="role-sub text-secondary">Alex Rivera (Warehouse Operations)</div>
+                        </div>
+                    </div>
+                    <span class="badge-role staff">STAFF</span>
+                </div>
+                <div class="role-desc">Daily Restocking (Stock-In), Customer Sales (Stock-Out) & Hardware Catalog</div>
+                
+                <form onsubmit="handleRolePasswordLogin(event, 'staff')" class="mt-3">
+                    <div class="input-group input-group-sm mb-2">
+                        <span class="input-group-text bg-dark border-secondary text-success"><i class="bi bi-key-fill"></i></span>
+                        <input type="password" id="passStaff" class="form-control form-control-custom" placeholder="Enter Staff Password" required autocomplete="current-password">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="togglePassVisibility('passStaff', this)" title="Show/Hide Password">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    <div id="errorStaff" class="alert alert-danger py-1 px-2 small mb-2" style="display: none; font-size: 0.78rem;"></div>
+                    <button type="submit" class="btn btn-sm btn-cyber-success w-100 py-2">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Sign In as Staff
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MAIN APPLICATION WRAPPER                   -->
+<!-- ========================================== -->
+<div class="app-wrapper" id="appWrapper" style="display: none;">
+<aside class="sidebar">
+    <div class="sidebar-brand">
+        <img src="assets/images/logo_icon_transparent.png" alt="TechStock Logo" class="sidebar-brand-icon" onerror="this.onerror=null; this.src='assets/images/logo_icon_badge.png';">
+        <div>
+            <div class="fw-bold text-white lh-1">TECHSTOCK</div>
+            <div class="small text-secondary" style="font-size: 0.68rem; letter-spacing: 0.05em;">INVENTORY SYSTEM</div>
+        </div>
+    </div>
+
+    <div class="sidebar-nav">
+        <div class="sidebar-section-title">Core Modules</div>
+        <div class="nav-link-custom active" onclick="switchTab('dashboard')">
+            <i class="bi bi-grid-1x2-fill"></i>
+            <span>Dashboard</span>
+        </div>
+        <div class="nav-link-custom" onclick="switchTab('catalog')">
+            <i class="bi bi-cpu-fill"></i>
+            <span>Hardware Catalog</span>
+        </div>
+        <div class="nav-link-custom" onclick="switchTab('categories')">
+            <i class="bi bi-tags-fill"></i>
+            <span>Categories</span>
+        </div>
+
+        <div class="sidebar-section-title">Stock Movements</div>
+        <div class="nav-link-custom" onclick="switchTab('stock_in')">
+            <i class="bi bi-box-arrow-in-down"></i>
+            <span>Stock-In (Restock)</span>
+        </div>
+        <div class="nav-link-custom" onclick="switchTab('stock_out')">
+            <i class="bi bi-box-arrow-up-right"></i>
+            <span>Stock-Out (Sales)</span>
+        </div>
+        <div class="nav-link-custom" onclick="switchTab('low_stock')">
+            <i class="bi bi-exclamation-triangle-fill text-warning"></i>
+            <span>Low-Stock Alerts</span>
+            <span class="badge bg-danger rounded-pill ms-auto px-2" id="sidebarLowStockBadge">0</span>
+        </div>
+
+        <div class="sidebar-section-title">Reports & Logs</div>
+        <div class="nav-link-custom" onclick="switchTab('transactions')">
+            <i class="bi bi-journal-text"></i>
+            <span>Transaction History</span>
+        </div>
+
+        <div class="sidebar-section-title" id="adminSectionTitle">Administration</div>
+        <div class="nav-link-custom" id="userMgmtNavLink" onclick="switchTab('users')">
+            <i class="bi bi-people-fill"></i>
+            <span>User Management</span>
+        </div>
+    </div>
+
+    <div class="p-3 border-top border-secondary border-opacity-25 small text-secondary">
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <span class="d-block text-white fw-medium" id="sidebarUserName">Bryan Cole (Admin)</span>
+                <span class="badge-role admin" id="sidebarUserRole">ADMIN</span>
+            </div>
+            <div class="d-flex gap-1">
+                <button class="btn btn-outline-secondary btn-sm p-1 px-2" title="Reset Demo Data" onclick="resetDemoData()">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </button>
+                <button class="btn btn-outline-danger btn-sm p-1 px-2" title="Sign Out to Login Portal" onclick="handleLogout()">
+                    <i class="bi bi-box-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</aside>
+
+<!-- Main Work Area -->
+<div class="main-content">
+    <!-- Top Bar with Interactive Role Switcher -->
+    <header class="top-navbar">
+        <div class="d-flex align-items-center gap-3">
+            <span class="badge bg-dark text-info border border-info border-opacity-25 d-none d-md-inline-flex align-items-center gap-2">
+                <img src="assets/images/logo_icon_transparent.png" alt="TechStock" style="width: 18px; height: 18px; object-fit: contain;"> TechStock Inventory System
+            </span>
+            <span class="text-secondary small d-none d-lg-inline">
+                Prepared by: <strong>Bryan Cahayag Cole</strong>
+            </span>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+            <!-- Role Switcher for instant evaluator testing -->
+            <div class="d-flex align-items-center gap-1 bg-dark bg-opacity-75 p-1 px-2 rounded border border-secondary border-opacity-25">
+                <span class="small text-secondary px-2 d-none d-sm-inline">Role:</span>
+                <button class="btn btn-xs btn-primary py-0 px-2" id="roleBtnAdmin" onclick="setDemoRole('admin')">Admin</button>
+                <button class="btn btn-xs btn-outline-warning py-0 px-2" id="roleBtnAuditor" onclick="setDemoRole('auditor')">Audit</button>
+                <button class="btn btn-xs btn-outline-success py-0 px-2" id="roleBtnStaff" onclick="setDemoRole('staff')">Staff</button>
+            </div>
+
+            <button class="btn btn-sm btn-outline-secondary" onclick="resetDemoData()" title="Reset to initial seed data">
+                <i class="bi bi-arrow-repeat"></i>
+            </button>
+
+            <!-- Sign Out Button -->
+            <button class="btn btn-sm btn-outline-danger d-flex align-items-center gap-1" onclick="handleLogout()" title="Log out back to login portal">
+                <i class="bi bi-box-arrow-right"></i>
+                <span class="d-none d-sm-inline">Sign Out</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Toast Notification Banner -->
+    <div id="toastContainer" class="px-4 pt-3 no-print" style="display: none;"></div>
+
+    <main class="page-container">
+        <!-- Auditor Compliance & Inspection Notice -->
+        <div id="auditorComplianceNotice" class="alert py-2 px-3 mb-4 no-print" style="display: none; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); color: #fde68a; border-radius: 10px;">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <i class="bi bi-shield-check text-warning me-2 fs-5"></i>
+                    <strong>AUDIT & COMPLIANCE MODE ACTIVE:</strong> Signed in with Auditor credentials. System is in <em>Read-Only Inspection Mode</em> (Stock movements and Catalog edits are restricted).
+                </div>
+                <span class="badge bg-warning bg-opacity-25 text-warning border border-warning border-opacity-50">AUDIT VERIFICATION</span>
+            </div>
+        </div>
+
+        <!-- 1. DASHBOARD TAB -->
+        <div id="tab-dashboard" class="tab-view">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+                <div>
+                    <h2 class="h4 text-white fw-bold mb-1"><i class="bi bi-speedometer2 text-info me-2"></i>Shop Inventory Dashboard</h2>
+                    <div class="text-secondary small">Real-time computer hardware stock, valuation, and restocking signals</div>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-secondary btn-sm" onclick="switchTab('transactions')">
+                        <i class="bi bi-file-earmark-spreadsheet me-1"></i> Audit Logs
+                    </button>
+                    <button class="btn btn-outline-warning btn-sm position-relative" onclick="switchTab('low_stock')">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i> Low Stock Alerts
+                        <span class="badge bg-danger rounded-pill ms-1" id="dashLowStockBadge">0</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="row g-3 mb-4">
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card-custom stat-card">
+                        <div class="stat-icon primary"><i class="bi bi-cpu"></i></div>
+                        <div>
+                            <div class="stat-value" id="dashTotalSkus">0</div>
+                            <div class="stat-label">Hardware SKUs</div>
+                            <div class="small text-secondary mt-1" id="dashTotalUnits">0 units in shop</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card-custom stat-card">
+                        <div class="stat-icon success"><i class="bi bi-currency-dollar"></i></div>
+                        <div>
+                            <div class="stat-value" id="dashRetailValue">₱0.00</div>
+                            <div class="stat-label">Inventory Retail Value</div>
+                            <div class="small text-muted mt-1" id="dashCostValue">Cost: ₱0.00</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card-custom stat-card">
+                        <div class="stat-icon warning"><i class="bi bi-exclamation-diamond"></i></div>
+                        <div>
+                            <div class="stat-value text-warning" id="dashLowStockCount">0</div>
+                            <div class="stat-label">Low Stock Items</div>
+                            <div class="small text-secondary mt-1">Below minimum threshold</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card-custom stat-card">
+                        <div class="stat-icon danger"><i class="bi bi-x-octagon"></i></div>
+                        <div>
+                            <div class="stat-value text-danger" id="dashOutStockCount">0</div>
+                            <div class="stat-label">Out of Stock</div>
+                            <div class="small text-secondary mt-1">Needs urgent supplier order</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart & Low Stock -->
+            <div class="row g-4 mb-4">
+                <div class="col-lg-7">
+                    <div class="card-custom h-100 p-3">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="text-white mb-0"><i class="bi bi-pie-chart-fill text-info me-2"></i>Stock Distribution by Category</h6>
+                            <span class="badge bg-dark border border-secondary text-secondary">Units</span>
+                        </div>
+                        <div style="height: 270px; position: relative;">
+                            <canvas id="demoChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="card-custom h-100 p-3">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="text-warning mb-0"><i class="bi bi-bell-fill me-2"></i>Restock Priority Feed</h6>
+                            <button class="btn btn-link btn-sm text-info p-0 text-decoration-none" onclick="switchTab('low_stock')">View All</button>
+                        </div>
+                        <div id="dashLowStockList" class="d-flex flex-column gap-2"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Transactions in Dashboard -->
+            <div class="card-custom">
+                <div class="card-custom-header">
+                    <h6 class="text-white mb-0"><i class="bi bi-clock-history text-info me-2"></i>Recent Stock Movements</h6>
+                    <button class="btn btn-link btn-sm text-info p-0 text-decoration-none" onclick="switchTab('transactions')">Full Audit Log &rarr;</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table-custom">
+                        <thead>
+                            <tr>
+                                <th>Ref Code</th>
+                                <th>Date & Time</th>
+                                <th>Hardware Item</th>
+                                <th>Type</th>
+                                <th>Purpose</th>
+                                <th>Qty</th>
+                                <th>Handler</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dashRecentTxBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. HARDWARE CATALOG TAB -->
+        <div id="tab-catalog" class="tab-view" style="display: none;">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+                <div>
+                    <h2 class="h4 text-white fw-bold mb-1"><i class="bi bi-cpu text-info me-2"></i>Hardware Catalog & Items</h2>
+                    <div class="text-secondary small">Centralized inventory of computer parts, components, and peripherals</div>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="exportDemoCSV('productsTable', 'computer_hardware_inventory.csv')">
+                        <i class="bi bi-file-earmark-arrow-down me-1"></i> Export CSV
+                    </button>
+                    <button type="button" class="btn btn-cyber-primary btn-sm role-action-btn" data-bs-toggle="modal" data-bs-target="#demoProductModal" onclick="openAddProductModal()">
+                        <i class="bi bi-plus-lg me-1"></i> Add Hardware Item
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search & Filter Controls -->
+            <div class="card-custom mb-4 p-3">
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-5">
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control form-control-custom" id="demoCatalogSearch" placeholder="Search by SKU, item name, brand, or specs..." oninput="renderCatalogTable()">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <select class="form-select form-select-custom" id="demoCategoryFilter" onchange="renderCatalogTable()"></select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select form-select-custom" id="demoStockStatusFilter" onchange="renderCatalogTable()">
+                            <option value="ALL">All Stock Levels</option>
+                            <option value="IN_STOCK">In Stock Only</option>
+                            <option value="LOW_STOCK">Low Stock Warning</option>
+                            <option value="OUT_OF_STOCK">Out of Stock</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-custom">
+                <div class="table-responsive">
+                    <table class="table-custom" id="productsTable">
+                        <thead>
+                            <tr>
+                                <th>SKU / Part No.</th>
+                                <th>Hardware Item</th>
+                                <th>Category</th>
+                                <th>Brand</th>
+                                <th class="text-end">Cost</th>
+                                <th class="text-end">Retail Price</th>
+                                <th class="text-center">Stock</th>
+                                <th>Status</th>
+                                <th>Shelf/Rack</th>
+                                <th class="text-end role-action-col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="catalogTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. CATEGORIES TAB -->
+        <div id="tab-categories" class="tab-view" style="display: none;">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+                <div>
+                    <h2 class="h4 text-white fw-bold mb-1"><i class="bi bi-tags-fill text-info me-2"></i>Hardware Component Categories</h2>
+                    <div class="text-secondary small">Group and organize inventory by part classification</div>
+                </div>
+            </div>
+            <div class="row g-3" id="categoriesCardGrid"></div>
+        </div>
+
+        <!-- 4. STOCK-IN TAB -->
+        <div id="tab-stock_in" class="tab-view" style="display: none;">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+                <div>
+                    <h2 class="h4 text-white fw-bold mb-1"><i class="bi bi-box-arrow-in-down text-success me-2"></i>Stock-In (Restock / Supplier Deliveries)</h2>
+                    <div class="text-secondary small">Record incoming inventory shipments from distributors</div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-5" id="stockInFormCol">
+                    <div class="card-custom p-4">
+                        <h5 class="text-white mb-3 fw-bold"><i class="bi bi-pencil-square text-success me-2"></i>Receive New Stock</h5>
+                        <form onsubmit="handleDemoStockIn(event)">
+                            <div class="mb-3">
+                                <label class="form-label small text-secondary fw-semibold">Hardware Component *</label>
+                                <select id="stockInProductSelect" class="form-select form-select-custom" required onchange="onDemoStockInSelect(this)"></select>
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label class="form-label small text-secondary fw-semibold">Quantity Received *</label>
+                                    <input type="number" id="stockInQtyInput" class="form-control form-control-custom" min="1" value="5" required>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small text-secondary fw-semibold">Supplier Unit Cost (₱)</label>
+                                    <input type="number" step="0.01" id="stockInCostInput" class="form-control form-control-custom" placeholder="0.00">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small text-secondary fw-semibold">Supplier / Distributor</label>
+                                <select id="stockInSupplierSelect" class="form-select form-select-custom">
+                                    <option value="TechFrontier Distribution Inc.">TechFrontier Distribution Inc.</option>
+                                    <option value="Apex Hardware Supply Corp.">Apex Hardware Supply Corp.</option>
+                                    <option value="Nexus Components Global">Nexus Components Global</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small text-secondary fw-semibold">Delivery Receipt / PO No.</label>
+                                <input type="text" id="stockInRefInput" class="form-control form-control-custom" placeholder="e.g., PO-TF-2026-901">
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label small text-secondary fw-semibold">Remarks</label>
+                                <textarea id="stockInNotesInput" rows="2" class="form-control form-control-custom" placeholder="Supplier delivery notes, condition, batch code..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-cyber-success w-100 py-2">
+                                <i class="bi bi-box-arrow-in-down me-1"></i> Confirm Stock-In Entry
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="col-lg-7" id="stockInHistoryCol">
+                    <div class="card-custom h-100">
+                        <div class="card-custom-header">
+                            <h6 class="text-white mb-0"><i class="bi bi-clock-history text-success me-2"></i>Recent Stock-In Deliveries</h6>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table-custom">
+                                <thead>
+                                    <tr>
+                                        <th>Ref Code</th>
+                                        <th>Hardware Component</th>
+                                        <th>Supplier</th>
+                                        <th class="text-center">Qty</th>
+                                        <th class="text-end">Cost</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="stockInHistoryTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. STOCK-OUT TAB -->
+        <div id="tab-stock_out" class="tab-view" style="display: none;">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+                <div>
+                    <h2 class="h4 text-white fw-bold mb-1"><i class="bi bi-box-arrow-up-right text-warning me-2"></i>Stock-Out (Sales / Component Issuance)</h2>
+                    <div class="text-secondary small">Record customer sales, system builds, and RMA replacements</div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-5" id="stockOutFormCol">
+                    <div class="card-custom p-4">
+                        <h5 class="text-white mb-3 fw-bold"><i class="bi bi-cart-dash text-warning me-2"></i>Record Component Issue</h5>
+                        <form onsubmit="handleDemoStockOut(event)">
+                            <div class="mb-3">
+                                <label class="form-label small text-secondary fw-semibold">Hardware Component *</label>
+                                <select id="stockOutProductSelect" class="form-select form-select-custom" required onchange="onDemoStockOutSelect(this)"></select>
+                                <div id="demoStockOutAvailable" class="small mt-1 text-info"></div>
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label class="form-label small text-secondary fw-semibold">Quantity to Issue *</label>
+                                    <input type="number" id="stockOutQtyInput" class="form-control form-control-custom" min="1" value="1" required>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small text-secondary fw-semibold">Selling Price (₱)</label>
+                                    <input type="number" step="0.01" id="stockOutPriceInput" class="form-control form-control-custom" placeholder="0.00">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small text-secondary fw-semibold">Purpose / Reason *</label>
+                                <select id="stockOutPurposeSelect" class="form-select form-select-custom">
+                                    <option value="Customer Sale">Customer Sale (Walk-in / Online)</option>
+                                    <option value="Shop Build">Shop Custom PC Assembly</option>
+                                    <option value="Defective/RMA">Defective / RMA Return to Supplier</option>
+                                    <option value="Internal Use">Internal Shop Testing / Upgrade</option>
+                                </select>
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label class="form-label small text-secondary fw-semibold">Invoice / Reference No.</label>
+                                    <input type="text" id="stockOutRefInput" class="form-control form-control-custom" placeholder="INV-2026-1099">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small text-secondary fw-semibold">Customer / Recipient</label>
+                                    <input type="text" id="stockOutRecipientInput" class="form-control form-control-custom" placeholder="Customer Name">
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label small text-secondary fw-semibold">Notes / Serial Number</label>
+                                <textarea id="stockOutNotesInput" rows="2" class="form-control form-control-custom" placeholder="Serial tracking, warranty coverage..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-cyber-primary w-100 py-2">
+                                <i class="bi bi-box-arrow-up-right me-1"></i> Confirm Stock-Out Release
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="col-lg-7" id="stockOutHistoryCol">
+                    <div class="card-custom h-100">
+                        <div class="card-custom-header">
+                            <h6 class="text-white mb-0"><i class="bi bi-clock-history text-warning me-2"></i>Recent Stock-Out Operations</h6>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table-custom">
+                                <thead>
+                                    <tr>
+                                        <th>Ref Code</th>
+                                        <th>Hardware Component</th>
+                                        <th>Purpose / Recipient</th>
+                                        <th class="text-center">Qty</th>
+                                        <th class="text-end">Price</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="stockOutHistoryTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. LOW-STOCK ALERTS TAB -->
+        <div id="tab-low_stock" class="tab-view" style="display: none;">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 no-print">
+                <div>
+                    <h2 class="h4 text-white fw-bold mb-1"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Low-Stock Warnings & Reorder Manager</h2>
+                    <div class="text-secondary small">Critical hardware parts nearing stock depletion requiring purchase orders</div>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="exportDemoCSV('lowStockTable', 'low_stock_reorder_sheet.csv')">
+                        <i class="bi bi-file-earmark-arrow-down me-1"></i> Export Reorder List
+                    </button>
+                    <button type="button" class="btn btn-outline-info btn-sm" onclick="window.print()">
+                        <i class="bi bi-printer me-1"></i> Print Purchase Reorder Sheet
+                    </button>
+                </div>
+            </div>
+
+            <!-- Print Header -->
+            <div class="d-none d-print-block mb-3">
+                <h3>COMPUSHOP INVENTORY - SUPPLIER REORDER SHEET</h3>
+                <div>Generated: <span id="printDateSpan"></span> &bull; Prepared by: <strong>Bryan Cahayag Cole</strong></div>
+                <hr>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="row g-3 mb-4 no-print">
+                <div class="col-md-4">
+                    <div class="card-custom stat-card">
+                        <div class="stat-icon warning"><i class="bi bi-exclamation-diamond"></i></div>
+                        <div>
+                            <div class="stat-value text-warning" id="lowStockItemsCount">0</div>
+                            <div class="stat-label">Items Below Threshold</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card-custom stat-card">
+                        <div class="stat-icon primary"><i class="bi bi-box-seam"></i></div>
+                        <div>
+                            <div class="stat-value" id="lowStockUnitsCount">0</div>
+                            <div class="stat-label">Suggested Restock Units</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card-custom stat-card">
+                        <div class="stat-icon success"><i class="bi bi-cash-stack"></i></div>
+                        <div>
+                            <div class="stat-value text-success" id="lowStockBudgetCount">₱0.00</div>
+                            <div class="stat-label">Estimated Supplier Budget</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-custom">
+                <div class="table-responsive">
+                    <table class="table-custom" id="lowStockTable">
+                        <thead>
+                            <tr>
+                                <th>SKU</th>
+                                <th>Hardware Component</th>
+                                <th>Category</th>
+                                <th class="text-center">Current Stock</th>
+                                <th class="text-center">Min Threshold</th>
+                                <th class="text-center">Suggested Order</th>
+                                <th class="text-end">Unit Cost</th>
+                                <th class="text-end">Subtotal Cost</th>
+                                <th class="text-center role-action-col no-print">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lowStockTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. TRANSACTIONS TAB -->
+        <div id="tab-transactions" class="tab-view" style="display: none;">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 no-print">
+                <div>
+                    <h2 class="h4 text-white fw-bold mb-1"><i class="bi bi-journal-check text-info me-2"></i>Inventory Transaction History & Audit Log</h2>
+                    <div class="text-secondary small">Immutable chronological audit trail of all component restocks and customer releases</div>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="exportDemoCSV('transactionsTable', 'transactions_audit_log.csv')">
+                        <i class="bi bi-file-earmark-arrow-down me-1"></i> Export CSV
+                    </button>
+                    <button type="button" class="btn btn-outline-info btn-sm" onclick="window.print()">
+                        <i class="bi bi-printer me-1"></i> Print Audit Trail
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="card-custom mb-4 p-3 no-print">
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-4">
+                        <input type="text" id="txSearchInput" class="form-control form-control-custom" placeholder="Search by SKU, item, code, handler..." oninput="renderTransactionsTable()">
+                    </div>
+                    <div class="col-md-4">
+                        <select id="txTypeFilter" class="form-select form-select-custom" onchange="renderTransactionsTable()">
+                            <option value="ALL">All Types (IN & OUT)</option>
+                            <option value="IN">Stock-In (Restocks)</option>
+                            <option value="OUT">Stock-Out (Sales/Issues)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <select id="txPurposeFilter" class="form-select form-select-custom" onchange="renderTransactionsTable()">
+                            <option value="ALL">All Purposes</option>
+                            <option value="Supplier Delivery">Supplier Delivery</option>
+                            <option value="Customer Sale">Customer Sale</option>
+                            <option value="Shop Build">Shop Build</option>
+                            <option value="Defective/RMA">Defective/RMA</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-custom">
+                <div class="table-responsive">
+                    <table class="table-custom" id="transactionsTable">
+                        <thead>
+                            <tr>
+                                <th>Ref Code</th>
+                                <th>Date & Time</th>
+                                <th>Hardware Component</th>
+                                <th>Movement</th>
+                                <th>Purpose / Reason</th>
+                                <th class="text-center">Qty</th>
+                                <th>Party / Reference</th>
+                                <th>Handler</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 8. USERS TAB -->
+        <div id="tab-users" class="tab-view" style="display: none;">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+                <div>
+                    <h2 class="h4 text-white fw-bold mb-1"><i class="bi bi-people-fill text-info me-2"></i>User & Role Administration</h2>
+                    <div class="text-secondary small">Manage computer shop staff accounts and access roles</div>
+                </div>
+                <button class="btn btn-cyber-primary btn-sm" data-bs-toggle="modal" data-bs-target="#demoUserModal">
+                    <i class="bi bi-person-plus-fill me-1"></i> Add System User
+                </button>
+            </div>
+
+            <div class="card-custom">
+                <div class="table-responsive">
+                    <table class="table-custom">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Email</th>
+                                <th>Role Classification</th>
+                                <th>Account Status</th>
+                                <th>Date Registered</th>
+                            </tr>
+                        </thead>
+                        <tbody id="demoUsersTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="py-3 px-4 border-top border-secondary border-opacity-25 text-secondary small d-flex flex-wrap justify-content-between align-items-center no-print">
+        <div>
+            &copy; 2026 <strong>TechStock - Computer Shop Inventory System</strong> &bull; Prepared by <strong>Bryan Cahayag Cole</strong>
+        </div>
+        <div>
+            Interactive Web Application &bull; All Rights Reserved
+        </div>
+    </footer>
+</div>
+</div> <!-- /appWrapper -->
+
+<!-- Modal: Add / Edit Product -->
+<div class="modal fade" id="demoProductModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <form onsubmit="handleSaveProduct(event)" class="modal-content modal-content-custom">
+            <input type="hidden" id="demoEditProductId" value="">
+            <div class="modal-header border-bottom border-secondary border-opacity-25 p-3">
+                <h5 class="modal-title text-white" id="demoProductModalTitle">Add Hardware Component</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label small text-secondary fw-semibold">SKU / Part No. *</label>
+                        <input type="text" id="prodSku" class="form-control form-control-custom" placeholder="e.g. CPU-AMD-9800X" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small text-secondary fw-semibold">Brand *</label>
+                        <input type="text" id="prodBrand" class="form-control form-control-custom" placeholder="e.g. AMD, ASUS, MSI" required>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small text-secondary fw-semibold">Product Name *</label>
+                        <input type="text" id="prodName" class="form-control form-control-custom" placeholder="e.g. AMD Ryzen 9 9900X Processor" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small text-secondary fw-semibold">Category *</label>
+                        <select id="prodCategory" class="form-select form-select-custom" required></select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small text-secondary fw-semibold">Shelf Location</label>
+                        <input type="text" id="prodLocation" class="form-control form-control-custom" placeholder="Cabinet CPU-1">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small text-secondary fw-semibold">Specifications</label>
+                        <textarea id="prodSpecs" rows="2" class="form-control form-control-custom" placeholder="Cores, clock speed, socket, VRAM..."></textarea>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small text-secondary fw-semibold">Cost Price (₱)</label>
+                        <input type="number" step="0.01" id="prodCost" class="form-control form-control-custom" value="0.00">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small text-secondary fw-semibold">Selling Price (₱) *</label>
+                        <input type="number" step="0.01" id="prodPrice" class="form-control form-control-custom" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small text-secondary fw-semibold">Stock Qty</label>
+                        <input type="number" id="prodQty" class="form-control form-control-custom" value="1" min="0">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small text-secondary fw-semibold">Alert Threshold</label>
+                        <input type="number" id="prodThreshold" class="form-control form-control-custom" value="5" min="1">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-top border-secondary border-opacity-25 p-3">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-cyber-primary btn-sm">Save Component</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Add User -->
+<div class="modal fade" id="demoUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form onsubmit="handleSaveUser(event)" class="modal-content modal-content-custom">
+            <div class="modal-header border-bottom border-secondary border-opacity-25 p-3">
+                <h5 class="modal-title text-white">Add System User</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="mb-3">
+                    <label class="form-label small text-secondary fw-semibold">Full Name *</label>
+                    <input type="text" id="newUserName" class="form-control form-control-custom" placeholder="John Reyes" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small text-secondary fw-semibold">Username *</label>
+                    <input type="text" id="newUserUsername" class="form-control form-control-custom" placeholder="jreyes" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small text-secondary fw-semibold">Email *</label>
+                    <input type="email" id="newUserEmail" class="form-control form-control-custom" placeholder="jreyes@shop.local" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small text-secondary fw-semibold">Role *</label>
+                    <select id="newUserRole" class="form-select form-select-custom">
+                        <option value="staff">Staff (Inventory Operations)</option>
+                        <option value="admin">Admin (Full Control)</option>
+                        <option value="auditor">Auditor (View Only)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer border-top border-secondary border-opacity-25 p-3">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-cyber-primary btn-sm">Create Account</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Bootstrap 5 Bundle JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Standalone Application Logic -->
+<script>
+// Default Seed Data
+const DEFAULT_CATEGORIES = [
+    { id: 1, name: 'Processors (CPU)', code: 'CPU', icon: 'bi-cpu', description: 'Central processing units for AMD and Intel sockets' },
+    { id: 2, name: 'Graphics Cards (GPU)', code: 'GPU', icon: 'bi-gpu-card', description: 'Dedicated gaming and workstation graphics cards' },
+    { id: 3, name: 'Motherboards (Mobo)', code: 'MB', icon: 'bi-motherboard', description: 'AM5, AM4, and Intel LGA1700 motherboards' },
+    { id: 4, name: 'Memory (RAM)', code: 'RAM', icon: 'bi-memory', description: 'DDR4 and DDR5 high-speed desktop memory kits' },
+    { id: 5, name: 'Storage (SSD & HDD)', code: 'STR', icon: 'bi-hdd', description: 'NVMe Gen4 M.2 SSDs, SATA drives, high-capacity HDDs' },
+    { id: 6, name: 'Power Supplies (PSU)', code: 'PSU', icon: 'bi-lightning-charge', description: '80+ Gold and Bronze certified power supply units' },
+    { id: 7, name: 'PC Cases & Cooling', code: 'CASE', icon: 'bi-box', description: 'ATX airflow cases, liquid AIO coolers, tower air coolers' },
+    { id: 8, name: 'Peripherals', code: 'PERI', icon: 'bi-display', description: 'High-refresh monitors, mechanical keyboards, gaming mice' },
+    { id: 9, name: 'Cables & Accessories', code: 'ACC', icon: 'bi-plugin', description: '8K DisplayPort, HDMI, Cat6 ethernet, thermal paste' },
+    { id: 10, name: 'Pre-built Systems & Laptops', code: 'SYS', icon: 'bi-laptop', description: 'Gaming laptops and turnkey desktop PC towers' }
+];
+
+const DEFAULT_PRODUCTS = [
+    { id: 1, sku: 'CPU-AMD-7800X3D', name: 'AMD Ryzen 7 7800X3D Processor', category_id: 1, brand: 'AMD', specifications: '8-Cores, 16-Threads, 5.0GHz Boost, 104MB Cache, AM5', unit_cost: 18500, selling_price: 22500, quantity: 8, min_threshold: 4, location: 'Cabinet CPU-1' },
+    { id: 2, sku: 'CPU-INT-14700K', name: 'Intel Core i7-14700K Processor', category_id: 1, brand: 'Intel', specifications: '20 Cores (8P+12E), 28 Threads, Up to 5.6GHz, LGA1700', unit_cost: 21000, selling_price: 24800, quantity: 5, min_threshold: 3, location: 'Cabinet CPU-1' },
+    { id: 3, sku: 'CPU-AMD-5600X', name: 'AMD Ryzen 5 5600X Processor', category_id: 1, brand: 'AMD', specifications: '6-Cores, 12-Threads, 4.6GHz Boost, AM4 Socket', unit_cost: 7200, selling_price: 8800, quantity: 2, min_threshold: 5, location: 'Cabinet CPU-2' }, // Low
+    { id: 4, sku: 'GPU-ASUS-4070TIS', name: 'ASUS TUF Gaming GeForce RTX 4070 Ti SUPER', category_id: 2, brand: 'ASUS', specifications: '16GB GDDR6X, 256-bit, DLSS 3, Triple Fan', unit_cost: 46000, selling_price: 52500, quantity: 4, min_threshold: 2, location: 'Glass Case GPU-A' },
+    { id: 5, sku: 'GPU-MSI-4060VENT', name: 'MSI GeForce RTX 4060 Ventus 2X Black OC', category_id: 2, brand: 'MSI', specifications: '8GB GDDR6, 128-bit, Dual Fan, DLSS 3', unit_cost: 16800, selling_price: 19900, quantity: 9, min_threshold: 3, location: 'Glass Case GPU-B' },
+    { id: 6, sku: 'GPU-SAP-7800XT', name: 'Sapphire Pure AMD Radeon RX 7800 XT', category_id: 2, brand: 'Sapphire', specifications: '16GB GDDR6, Tri-X Cooling, White Edition', unit_cost: 29000, selling_price: 33500, quantity: 1, min_threshold: 3, location: 'Glass Case GPU-B' }, // Low
+    { id: 7, sku: 'MB-ASUS-B650E', name: 'ASUS ROG STRIX B650E-F GAMING WIFI', category_id: 3, brand: 'ASUS', specifications: 'AMD AM5, DDR5, PCIe 5.0 x16, 3x M.2, WiFi 6E', unit_cost: 14200, selling_price: 16900, quantity: 6, min_threshold: 3, location: 'Shelf MB-1' },
+    { id: 8, sku: 'RAM-COR-DDR5-32', name: 'Corsair Vengeance RGB 32GB (2x16GB) DDR5', category_id: 4, brand: 'Corsair', specifications: '6000MHz, CL30, AMD EXPO & Intel XMP Ready', unit_cost: 6400, selling_price: 7800, quantity: 12, min_threshold: 4, location: 'Drawer RAM-1' },
+    { id: 9, sku: 'RAM-GSK-DDR4-16', name: 'G.Skill Ripjaws V 16GB (2x8GB) DDR4', category_id: 4, brand: 'G.Skill', specifications: '3200MHz, CL16, 1.35V Dual Channel Kit', unit_cost: 2200, selling_price: 2750, quantity: 3, min_threshold: 5, location: 'Drawer RAM-2' }, // Low
+    { id: 10, sku: 'STR-SAM-990PRO2TB', name: 'Samsung 990 PRO NVMe M.2 SSD 2TB', category_id: 5, brand: 'Samsung', specifications: 'PCIe Gen 4.0 x4, 7450 MB/s Read, 6900 MB/s Write', unit_cost: 9200, selling_price: 11400, quantity: 10, min_threshold: 3, location: 'Drawer STR-1' },
+    { id: 11, sku: 'STR-SEA-BARR-2TB', name: 'Seagate BarraCuda 2TB 3.5" Internal HDD', category_id: 5, brand: 'Seagate', specifications: '7200 RPM, SATA 6Gb/s, 256MB Cache', unit_cost: 2800, selling_price: 3400, quantity: 0, min_threshold: 4, location: 'Shelf STR-2' }, // Out of stock!
+    { id: 12, sku: 'PSU-SEA-FOCUS-850', name: 'Seasonic FOCUS GX-850 850W Gold', category_id: 6, brand: 'Seasonic', specifications: '80 PLUS Gold, Fully Modular, ATX 3.0 / PCIe 5.0', unit_cost: 6900, selling_price: 8400, quantity: 7, min_threshold: 3, location: 'Shelf PSU-1' },
+    { id: 13, sku: 'CAS-NZXT-H5FLOW', name: 'NZXT H5 Flow Compact ATX Mid-Tower', category_id: 7, brand: 'NZXT', specifications: 'Airflow Front Panel, Tempered Glass, Black', unit_cost: 4300, selling_price: 5200, quantity: 5, min_threshold: 2, location: 'Rack Case-1' },
+    { id: 14, sku: 'PER-LOG-GPROSL', name: 'Logitech G PRO X SUPERLIGHT Mouse', category_id: 8, brand: 'Logitech', specifications: 'HERO 25K Sensor, <63g Wireless, White', unit_cost: 5900, selling_price: 7200, quantity: 2, min_threshold: 3, location: 'Showcase Peri-1' }, // Low
+    { id: 15, sku: 'ACC-UGREEN-DP14', name: 'UGREEN 8K DisplayPort 1.4 Cable 2M', category_id: 9, brand: 'UGREEN', specifications: '32.4Gbps, Supports 8K@60Hz, Braided', unit_cost: 450, selling_price: 750, quantity: 25, min_threshold: 5, location: 'Pegboard Cable-1' },
+    { id: 16, sku: 'SYS-ASUS-TUF-A15', name: 'Bryan Custom Gaming Laptop 15.6"', category_id: 10, brand: 'ASUS', specifications: 'Ryzen 7 7735HS, RTX 4060 8GB, 16GB DDR5, 512GB SSD', unit_cost: 52000, selling_price: 59990, quantity: 3, min_threshold: 2, location: 'Secure Vault 1' }
+];
+
+const DEFAULT_TRANSACTIONS = [
+    { id: 1, code: 'TXN-IN-20260901-A1', product_id: 1, type: 'IN', purpose: 'Supplier Delivery', quantity: 10, ref: 'PO-TF-8841', party: 'TechFrontier Distribution', handler: 'Bryan Cole', date: '2026-09-01 09:15', notes: 'Initial delivery' },
+    { id: 2, code: 'TXN-IN-20260902-B2', product_id: 4, type: 'IN', purpose: 'Supplier Delivery', quantity: 5, ref: 'PO-TF-8842', party: 'TechFrontier Distribution', handler: 'Bryan Cole', date: '2026-09-02 10:30', notes: 'GPU Batch arrival' },
+    { id: 3, code: 'TXN-OUT-20260903-C3', product_id: 1, type: 'OUT', purpose: 'Customer Sale', quantity: 2, ref: 'INV-2026-1049', party: 'Walk-in Customer (Gaming Rig)', handler: 'Alex Rivera', date: '2026-09-03 14:20', notes: 'Sold with thermal paste' },
+    { id: 4, code: 'TXN-OUT-20260904-D4', product_id: 4, type: 'OUT', purpose: 'Customer Sale', quantity: 1, ref: 'INV-2026-1055', party: 'John Doe', handler: 'Alex Rivera', date: '2026-09-04 16:45', notes: 'Courier dispatch' },
+    { id: 5, code: 'TXN-OUT-20260907-E5', product_id: 3, type: 'OUT', purpose: 'Customer Sale', quantity: 3, ref: 'INV-2026-1070', party: 'Student PC Builders', handler: 'Alex Rivera', date: '2026-09-07 15:40', notes: 'Walk-in cash' },
+    { id: 6, code: 'TXN-OUT-20260908-F6', product_id: 11, type: 'OUT', purpose: 'Customer Sale', quantity: 5, ref: 'INV-2026-1081', party: 'Office CCTV Upgrade', handler: 'Alex Rivera', date: '2026-09-08 17:05', notes: 'All remaining 2TB drives issued' },
+    { id: 7, code: 'TXN-OUT-20260909-G7', product_id: 14, type: 'OUT', purpose: 'Defective/RMA', quantity: 1, ref: 'RMA-LOG-004', party: 'Logitech Warranty RMA', handler: 'Alex Rivera', date: '2026-09-09 10:15', notes: 'Scroll wheel sensor swap' }
+];
+
+const DEFAULT_USERS = [
+    { id: 1, name: 'Bryan Cahayag Cole', username: 'admin', email: 'admin@computershop.local', role: 'admin', status: 'active', date: '2026-09-01' },
+    { id: 2, name: 'Alex Rivera', username: 'staff', email: 'staff@computershop.local', role: 'staff', status: 'active', date: '2026-09-01' },
+    { id: 3, name: 'Noel Montecillo', username: 'auditor', email: 'auditor@computershop.local', role: 'auditor', status: 'active', date: '2026-09-02' }
+];
+
+// App State
+let state = {
+    categories: [],
+    products: [],
+    transactions: [],
+    users: [],
+    currentRole: 'admin',
+    currentUser: null,
+    isLoggedIn: false,
+    currentTab: 'dashboard'
+};
+
+let chartInstance = null;
+
+// Initialize App
+function initApp() {
+    loadState();
+    if (typeof initGalaxy === 'function') {
+        initGalaxy();
+    }
+    checkAuthView();
+    populateCategoryDropdowns();
+    renderAll();
+    const dateSpan = document.getElementById('printDateSpan');
+    if (dateSpan) dateSpan.innerText = new Date().toLocaleString();
+}
+
+function loadState() {
+    const saved = localStorage.getItem('compu_shop_state_v3');
+    if (saved) {
+        try {
+            state = JSON.parse(saved);
+        } catch(e) {
+            resetToDefaults();
+        }
+    } else {
+        resetToDefaults();
+    }
+}
+
+function saveState() {
+    localStorage.setItem('compu_shop_state_v3', JSON.stringify(state));
+}
+
+function resetToDefaults() {
+    state.categories = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
+    state.products = JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
+    state.transactions = JSON.parse(JSON.stringify(DEFAULT_TRANSACTIONS));
+    state.users = JSON.parse(JSON.stringify(DEFAULT_USERS));
+    state.currentRole = 'admin';
+    state.currentUser = null;
+    state.isLoggedIn = false;
+    saveState();
+}
+
+function resetDemoData() {
+    if (confirm("Reset all hardware inventory and transactions back to initial demo data?")) {
+        const keepLoggedIn = state.isLoggedIn;
+        const keepUser = state.currentUser;
+        const keepRole = state.currentRole;
+        resetToDefaults();
+        if (keepLoggedIn) {
+            state.isLoggedIn = keepLoggedIn;
+            state.currentUser = keepUser;
+            state.currentRole = keepRole;
+            saveState();
+        }
+        populateCategoryDropdowns();
+        renderAll();
+        showToast("success", "Demo inventory data reset to default successfully!");
+    }
+}
+
+// Authentication & View Management
+function checkAuthView() {
+    const loginView = document.getElementById('loginView');
+    const appWrapper = document.getElementById('appWrapper');
+    if (!state.isLoggedIn) {
+        if (loginView) loginView.style.display = 'flex';
+        if (appWrapper) appWrapper.style.display = 'none';
+    } else {
+        if (loginView) loginView.style.display = 'none';
+        if (appWrapper) appWrapper.style.display = 'flex';
+        setupRoleUI();
+    }
+}
+
+function handleRolePasswordLogin(event, role) {
+    if (event) event.preventDefault();
+
+    let passInputId = '';
+    let errorId = '';
+    let validPass = '';
+    let roleFullName = '';
+    let username = '';
+
+    if (role === 'admin') {
+        passInputId = 'passAdmin';
+        errorId = 'errorAdmin';
+        validPass = 'admin123';
+        roleFullName = 'Bryan Cahayag Cole (Admin)';
+        username = 'admin';
+    } else if (role === 'auditor' || role === 'audit') {
+        passInputId = 'passAuditor';
+        errorId = 'errorAuditor';
+        validPass = 'audit123';
+        roleFullName = 'Prof. Noel Montecillo (Audit)';
+        username = 'audit';
+    } else if (role === 'staff') {
+        passInputId = 'passStaff';
+        errorId = 'errorStaff';
+        validPass = 'staff123';
+        roleFullName = 'Alex Rivera (Staff)';
+        username = 'staff';
+    }
+
+    const inputEl = document.getElementById(passInputId);
+    const errorEl = document.getElementById(errorId);
+    const enteredPass = inputEl ? inputEl.value.trim() : '';
+
+    // Clear previous errors
+    ['errorAdmin', 'errorAuditor', 'errorStaff'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
+
+    let isMatch = false;
+    if (role === 'admin' && (enteredPass === 'admin123' || enteredPass === 'admin')) {
+        isMatch = true;
+    } else if ((role === 'auditor' || role === 'audit') && (enteredPass === 'audit123' || enteredPass === 'auditor123' || enteredPass === 'audit' || enteredPass === 'auditor')) {
+        isMatch = true;
+    } else if (role === 'staff' && (enteredPass === 'staff123' || enteredPass === 'staff')) {
+        isMatch = true;
+    }
+
+    if (!isMatch) {
+        if (errorEl) {
+            errorEl.style.display = 'block';
+            errorEl.innerHTML = `<i class="bi bi-x-circle-fill me-1"></i> Incorrect password. Default: <code>${validPass}</code>`;
+        }
+        if (inputEl) {
+            inputEl.classList.add('is-invalid');
+            inputEl.focus();
+            setTimeout(() => inputEl.classList.remove('is-invalid'), 2500);
+        }
+        return;
+    }
+
+    // Success! Clear input & error
+    if (inputEl) inputEl.value = '';
+    if (errorEl) errorEl.style.display = 'none';
+
+    state.currentUser = {
+        name: roleFullName,
+        username: username,
+        role: (role === 'audit') ? 'auditor' : role
+    };
+    state.currentRole = (role === 'audit') ? 'auditor' : role;
+    state.isLoggedIn = true;
+    saveState();
+    checkAuthView();
+    renderAll();
+    showToast('success', `Welcome back, ${roleFullName}! Signed in as ${state.currentRole === 'auditor' ? 'AUDIT' : state.currentRole.toUpperCase()}.`);
+}
+
+function fillRolePass(role, pass) {
+    let passInputId = '';
+    if (role === 'admin') passInputId = 'passAdmin';
+    else if (role === 'auditor' || role === 'audit') passInputId = 'passAuditor';
+    else if (role === 'staff') passInputId = 'passStaff';
+
+    const inputEl = document.getElementById(passInputId);
+    if (inputEl) {
+        inputEl.value = pass;
+        inputEl.focus();
+    }
+}
+
+function togglePassVisibility(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    if (input.type === 'password') {
+        input.type = 'text';
+        btn.innerHTML = '<i class="bi bi-eye-slash"></i>';
+    } else {
+        input.type = 'password';
+        btn.innerHTML = '<i class="bi bi-eye"></i>';
+    }
+}
+
+function handleLogout() {
+    state.isLoggedIn = false;
+    state.currentUser = null;
+    saveState();
+    checkAuthView();
+    ['passAdmin', 'passAuditor', 'passStaff'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    ['errorAdmin', 'errorAuditor', 'errorStaff'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
+    showToast('info', 'You have been signed out to the login portal.');
+}
+
+// Role Management
+function setDemoRole(role) {
+    state.currentRole = role;
+    if (role === 'admin') {
+        state.currentUser = { name: 'Bryan Cahayag Cole (Admin)', username: 'admin', role: 'admin' };
+    } else if (role === 'auditor' || role === 'audit') {
+        state.currentUser = { name: 'Prof. Noel Montecillo (Audit)', username: 'audit', role: 'auditor' };
+    } else {
+        state.currentUser = { name: 'Alex Rivera (Staff)', username: 'staff', role: 'staff' };
+    }
+    saveState();
+    setupRoleUI();
+    renderAll();
+    showToast("info", `Switched active role to: ${role === 'auditor' ? 'AUDIT' : role.toUpperCase()}`);
+}
+
+function setupRoleUI() {
+    const role = state.currentRole;
+    ['admin', 'staff', 'auditor'].forEach(r => {
+        const btn = document.getElementById('roleBtn' + r.charAt(0).toUpperCase() + r.slice(1));
+        if (btn) {
+            if (r === role) {
+                if (r === 'admin') btn.className = 'btn btn-xs btn-primary py-0 px-2 fw-semibold';
+                else if (r === 'auditor') btn.className = 'btn btn-xs btn-warning py-0 px-2 fw-semibold text-dark';
+                else btn.className = 'btn btn-xs btn-success py-0 px-2 fw-semibold text-dark';
+            } else {
+                btn.className = 'btn btn-xs btn-outline-secondary py-0 px-2';
+            }
+        }
+    });
+
+    const roleSpan = document.getElementById('sidebarUserRole');
+    if (roleSpan) {
+        roleSpan.className = 'badge-role ' + (role === 'auditor' ? 'auditor' : role);
+        roleSpan.innerText = (role === 'auditor') ? 'AUDIT' : role.toUpperCase();
+    }
+
+    const nameSpan = document.getElementById('sidebarUserName');
+    if (nameSpan) {
+        if (state.currentUser && state.currentUser.name) {
+            nameSpan.innerText = state.currentUser.name;
+        } else {
+            if (role === 'admin') nameSpan.innerText = 'Bryan Cole (Admin)';
+            else if (role === 'staff') nameSpan.innerText = 'Alex Rivera (Staff)';
+            else nameSpan.innerText = 'Prof. Noel Montecillo (Audit)';
+        }
+    }
+
+    // Admin-only nav item
+    const adminTitle = document.getElementById('adminSectionTitle');
+    const userNav = document.getElementById('userMgmtNavLink');
+    if (role === 'admin') {
+        if (adminTitle) adminTitle.style.display = '';
+        if (userNav) userNav.style.display = '';
+    } else {
+        if (adminTitle) adminTitle.style.display = 'none';
+        if (userNav) userNav.style.display = 'none';
+        if (state.currentTab === 'users') switchTab('dashboard');
+    }
+
+    // Auditor read-only restrictions
+    const isAuditor = (role === 'auditor');
+    document.querySelectorAll('.role-action-btn').forEach(el => el.style.display = isAuditor ? 'none' : '');
+    document.querySelectorAll('.role-action-col').forEach(el => el.style.display = isAuditor ? 'none' : '');
+
+    const stockInForm = document.getElementById('stockInFormCol');
+    if (stockInForm) stockInForm.style.display = isAuditor ? 'none' : '';
+    const stockOutForm = document.getElementById('stockOutFormCol');
+    if (stockOutForm) stockOutForm.style.display = isAuditor ? 'none' : '';
+
+    // Auditor compliance alert notice
+    const auditNotice = document.getElementById('auditorComplianceNotice');
+    if (auditNotice) auditNotice.style.display = isAuditor ? 'block' : 'none';
+}
+
+// Navigation Tabs
+function switchTab(tabId) {
+    state.currentTab = tabId;
+    document.querySelectorAll('.tab-view').forEach(tab => tab.style.display = 'none');
+    const target = document.getElementById('tab-' + tabId);
+    if (target) target.style.display = 'block';
+
+    document.querySelectorAll('.sidebar-nav .nav-link-custom').forEach(link => link.classList.remove('active'));
+    const activeLink = Array.from(document.querySelectorAll('.sidebar-nav .nav-link-custom')).find(l => l.innerText.toLowerCase().includes(tabId.replace('_', ' ')));
+    if (activeLink) activeLink.classList.add('active');
+
+    renderAll();
+}
+
+// Helper: Get Category Name
+function getCategoryName(id) {
+    const cat = state.categories.find(c => c.id == id);
+    return cat ? cat.name : 'Unknown';
+}
+
+function getProductName(id) {
+    const p = state.products.find(prod => prod.id == id);
+    return p ? p.name : 'Unknown Product';
+}
+
+function getProductSku(id) {
+    const p = state.products.find(prod => prod.id == id);
+    return p ? p.sku : 'SKU-000';
+}
+
+// Render Master
+function renderAll() {
+    updateBadgesAndMetrics();
+    renderCatalogTable();
+    renderCategories();
+    renderStockInSelects();
+    renderStockOutSelects();
+    renderLowStock();
+    renderTransactionsTable();
+    renderUsers();
+    renderChart();
+}
+
+// Metrics & Badges
+function updateBadgesAndMetrics() {
+    let totalSkus = state.products.length;
+    let totalUnits = 0;
+    let costVal = 0;
+    let retailVal = 0;
+    let lowCount = 0;
+    let outCount = 0;
+
+    state.products.forEach(p => {
+        totalUnits += p.quantity;
+        costVal += (p.unit_cost * p.quantity);
+        retailVal += (p.selling_price * p.quantity);
+        if (p.quantity === 0) outCount++;
+        else if (p.quantity <= p.min_threshold) lowCount++;
+    });
+
+    document.getElementById('dashTotalSkus').innerText = totalSkus;
+    document.getElementById('dashTotalUnits').innerText = `${totalUnits.toLocaleString()} units in shop`;
+    document.getElementById('dashRetailValue').innerText = `₱${retailVal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    document.getElementById('dashCostValue').innerText = `Cost: ₱${costVal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    document.getElementById('dashLowStockCount').innerText = lowCount;
+    document.getElementById('dashOutStockCount').innerText = outCount;
+
+    const totalAlerts = lowCount + outCount;
+    document.getElementById('sidebarLowStockBadge').innerText = totalAlerts;
+    document.getElementById('dashLowStockBadge').innerText = totalAlerts;
+
+    // Render Dashboard Alert Feed
+    const alertItems = state.products.filter(p => p.quantity <= p.min_threshold).sort((a,b) => a.quantity - b.quantity).slice(0, 6);
+    const feed = document.getElementById('dashLowStockList');
+    if (alertItems.length === 0) {
+        feed.innerHTML = '<div class="text-center py-4 text-secondary"><i class="bi bi-check-circle text-success display-6 d-block mb-1"></i>All hardware items are healthy!</div>';
+    } else {
+        feed.innerHTML = alertItems.map(item => `
+            <div class="p-2 rounded bg-dark bg-opacity-50 border border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-white small fw-semibold">${item.name}</div>
+                    <div class="text-secondary small font-monospace">${item.sku} &bull; ${getCategoryName(item.category_id)}</div>
+                </div>
+                <div class="text-end">
+                    ${item.quantity === 0 ? '<span class="badge-status badge-out-of-stock">Depleted (0)</span>' : `<span class="badge-status badge-low-stock">${item.quantity} left</span>`}
+                    ${state.currentRole !== 'auditor' ? `<button class="btn btn-xs btn-outline-info py-0 px-2 mt-1 d-block" onclick="openRestockModalFor(${item.id})">+ Restock</button>` : ''}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Dashboard Recent Tx
+    const recentTx = state.transactions.slice().reverse().slice(0, 7);
+    const txBody = document.getElementById('dashRecentTxBody');
+    if (recentTx.length === 0) {
+        txBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-secondary">No transactions recorded yet.</td></tr>';
+    } else {
+        txBody.innerHTML = recentTx.map(t => `
+            <tr>
+                <td><code class="text-info">${t.code}</code></td>
+                <td class="text-secondary small">${t.date}</td>
+                <td><span class="text-white fw-medium">${getProductName(t.product_id)}</span><div class="small text-muted font-monospace">${getProductSku(t.product_id)}</div></td>
+                <td><span class="badge ${t.type === 'IN' ? 'bg-success bg-opacity-25 text-success' : 'bg-danger bg-opacity-25 text-danger'}">${t.type} (${t.type === 'IN' ? '+' : '-'}${t.quantity})</span></td>
+                <td class="text-secondary small">${t.purpose}</td>
+                <td class="fw-bold text-white">${t.quantity}</td>
+                <td class="text-secondary small">${t.handler}</td>
+            </tr>
+        `).join('');
+    }
+}
+
+// Chart Render
+function renderChart() {
+    const ctx = document.getElementById('demoChart');
+    if (!ctx) return;
+
+    const catMap = {};
+    state.categories.forEach(c => catMap[c.id] = { name: c.name, units: 0 });
+    state.products.forEach(p => {
+        if (catMap[p.category_id]) catMap[p.category_id].units += p.quantity;
+    });
+
+    const labels = Object.values(catMap).map(c => c.name);
+    const data = Object.values(catMap).map(c => c.units);
+
+    if (chartInstance) {
+        chartInstance.destroy();
+    }
+
+    chartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Stock Quantity',
+                data: data,
+                backgroundColor: [
+                    'rgba(56, 189, 248, 0.75)',  // Cyan
+                    'rgba(168, 85, 247, 0.75)',  // Purple
+                    'rgba(52, 211, 153, 0.75)',  // Emerald
+                    'rgba(251, 191, 36, 0.75)',  // Amber
+                    'rgba(244, 114, 182, 0.75)', // Pink
+                    'rgba(96, 165, 250, 0.75)',  // Blue
+                    'rgba(129, 140, 248, 0.75)', // Indigo
+                    'rgba(45, 212, 191, 0.75)',  // Teal
+                    'rgba(251, 146, 60, 0.75)',  // Orange
+                    'rgba(192, 132, 252, 0.75)'  // Violet
+                ],
+                borderColor: 'rgba(255, 255, 255, 0.2)',
+                borderWidth: 1,
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { 
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(13, 20, 38, 0.95)',
+                    titleColor: '#38bdf8',
+                    bodyColor: '#ffffff',
+                    borderColor: 'rgba(56, 189, 248, 0.4)',
+                    borderWidth: 1
+                }
+            },
+            scales: {
+                x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { display: false } },
+                y: { ticks: { color: '#94a3b8', precision: 0 }, grid: { color: 'rgba(255, 255, 255, 0.08)' } }
+            }
+        }
+    });
+}
+
+// Populate Category Filter Dropdowns
+function populateCategoryDropdowns() {
+    const catFilter = document.getElementById('demoCategoryFilter');
+    const modalCat = document.getElementById('prodCategory');
+    if (!catFilter || !modalCat) return;
+
+    let options = '<option value="ALL">All Categories</option>';
+    let modalOptions = '<option value="">-- Choose Category --</option>';
+
+    state.categories.forEach(c => {
+        options += `<option value="${c.id}">${c.name}</option>`;
+        modalOptions += `<option value="${c.id}">${c.name}</option>`;
+    });
+
+    catFilter.innerHTML = options;
+    modalCat.innerHTML = modalOptions;
+}
+
+// Render Catalog Table
+function renderCatalogTable() {
+    const q = (document.getElementById('demoCatalogSearch')?.value || '').toLowerCase().trim();
+    const cat = document.getElementById('demoCategoryFilter')?.value || 'ALL';
+    const status = document.getElementById('demoStockStatusFilter')?.value || 'ALL';
+    const tbody = document.getElementById('catalogTableBody');
+    if (!tbody) return;
+
+    const filtered = state.products.filter(p => {
+        const matchQ = (p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q) || (p.specifications || '').toLowerCase().includes(q));
+        const matchCat = (cat === 'ALL' || p.category_id == cat);
+        let matchStatus = true;
+        if (status === 'IN_STOCK') matchStatus = (p.quantity > p.min_threshold);
+        else if (status === 'LOW_STOCK') matchStatus = (p.quantity <= p.min_threshold && p.quantity > 0);
+        else if (status === 'OUT_OF_STOCK') matchStatus = (p.quantity === 0);
+        return matchQ && matchCat && matchStatus;
+    });
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" class="text-center py-5 text-secondary">No hardware items match your search.</td></tr>';
+        return;
+    }
+
+    const isAuditor = (state.currentRole === 'auditor');
+    const isAdmin = (state.currentRole === 'admin');
+
+    tbody.innerHTML = filtered.map(p => {
+        let badgeClass = 'badge-in-stock';
+        let badgeText = 'In Stock';
+        if (p.quantity === 0) {
+            badgeClass = 'badge-out-of-stock';
+            badgeText = 'Out of Stock';
+        } else if (p.quantity <= p.min_threshold) {
+            badgeClass = 'badge-low-stock';
+            badgeText = `Low Stock (${p.quantity}/${p.min_threshold})`;
+        }
+
+        return `
+            <tr>
+                <td><span class="badge bg-dark border border-secondary text-info font-monospace">${p.sku}</span></td>
+                <td>
+                    <div class="text-white fw-semibold">${p.name}</div>
+                    <div class="small text-secondary text-truncate" style="max-width: 250px;">${p.specifications || ''}</div>
+                </td>
+                <td><span class="badge bg-secondary bg-opacity-25 text-white">${getCategoryName(p.category_id)}</span></td>
+                <td class="text-secondary">${p.brand}</td>
+                <td class="text-end text-secondary">₱${p.unit_cost.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                <td class="text-end fw-semibold text-white">₱${p.selling_price.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                <td class="text-center fw-bold ${p.quantity === 0 ? 'text-danger' : (p.quantity <= p.min_threshold ? 'text-warning' : 'text-success')}">${p.quantity}</td>
+                <td><span class="badge-status ${badgeClass}">${badgeText}</span></td>
+                <td class="text-secondary small"><i class="bi bi-geo-alt me-1"></i>${p.location}</td>
+                ${!isAuditor ? `
+                <td class="text-end">
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-info" title="Edit" onclick="openEditProductModal(${p.id})"><i class="bi bi-pencil"></i></button>
+                        <button class="btn btn-outline-success" title="Restock" onclick="openRestockModalFor(${p.id})"><i class="bi bi-plus-lg"></i></button>
+                        <button class="btn btn-outline-warning" title="Issue" onclick="openIssueModalFor(${p.id})"><i class="bi bi-dash-lg"></i></button>
+                        ${isAdmin ? `<button class="btn btn-outline-danger" title="Delete" onclick="deleteDemoProduct(${p.id})"><i class="bi bi-trash"></i></button>` : ''}
+                    </div>
+                </td>` : ''}
+            </tr>
+        `;
+    }).join('');
+}
+
+// Categories Tab
+function renderCategories() {
+    const grid = document.getElementById('categoriesCardGrid');
+    if (!grid) return;
+
+    grid.innerHTML = state.categories.map(cat => {
+        const catProds = state.products.filter(p => p.category_id == cat.id);
+        const units = catProds.reduce((sum, p) => sum + p.quantity, 0);
+
+        return `
+            <div class="col-md-6 col-lg-4">
+                <div class="card-custom h-100 p-3">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <div class="stat-icon primary" style="width: 42px; height: 42px; font-size: 1.25rem;">
+                            <i class="bi ${cat.icon || 'bi-cpu'}"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-white mb-0 fw-bold">${cat.name}</h6>
+                            <span class="badge bg-dark border border-secondary text-info font-monospace">${cat.code}</span>
+                        </div>
+                    </div>
+                    <p class="text-secondary small mb-3">${cat.description}</p>
+                    <div class="mt-auto pt-2 border-top border-secondary border-opacity-25 d-flex justify-content-between small">
+                        <span class="text-secondary">Products: <strong class="text-white">${catProds.length}</strong></span>
+                        <span class="text-secondary">Total Stock: <strong class="text-info">${units} units</strong></span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Stock-In Select Dropdown
+function renderStockInSelects() {
+    const select = document.getElementById('stockInProductSelect');
+    if (!select) return;
+
+    select.innerHTML = '<option value="">-- Choose Component to Restock --</option>' + 
+        state.products.map(p => `<option value="${p.id}" data-cost="${p.unit_cost}">${p.name} (${p.sku}) - Current: ${p.quantity}</option>`).join('');
+
+    // Stock-In History
+    const tbody = document.getElementById('stockInHistoryTableBody');
+    const inTx = state.transactions.filter(t => t.type === 'IN').reverse().slice(0, 10);
+    tbody.innerHTML = inTx.map(t => `
+        <tr>
+            <td><code class="text-info small">${t.code}</code></td>
+            <td><div class="text-white small fw-medium">${getProductName(t.product_id)}</div><div class="small text-muted">${getProductSku(t.product_id)}</div></td>
+            <td class="small text-secondary">${t.party || 'Supplier'}</td>
+            <td class="text-center"><span class="badge bg-success bg-opacity-25 text-success">+${t.quantity}</span></td>
+            <td class="text-end text-secondary small">₱${(state.products.find(p => p.id == t.product_id)?.unit_cost || 0).toLocaleString()}</td>
+            <td class="text-secondary small">${t.date}</td>
+        </tr>
+    `).join('');
+}
+
+function onDemoStockInSelect(sel) {
+    const opt = sel.options[sel.selectedIndex];
+    const cost = opt.getAttribute('data-cost');
+    if (cost) document.getElementById('stockInCostInput').value = cost;
+}
+
+function handleDemoStockIn(e) {
+    e.preventDefault();
+    const pid = parseInt(document.getElementById('stockInProductSelect').value, 10);
+    const qty = parseInt(document.getElementById('stockInQtyInput').value, 10);
+    const cost = parseFloat(document.getElementById('stockInCostInput').value || '0');
+    const supp = document.getElementById('stockInSupplierSelect').value;
+    const ref = document.getElementById('stockInRefInput').value || 'PO-' + Date.now().toString().slice(-6);
+    const notes = document.getElementById('stockInNotesInput').value;
+
+    const prod = state.products.find(p => p.id == pid);
+    if (!prod) return;
+
+    prod.quantity += qty;
+    if (cost > 0) prod.unit_cost = cost;
+
+    const code = 'TXN-IN-' + new Date().toISOString().slice(0,10).replace(/-/g,'') + '-' + Math.random().toString(36).substring(2,6).toUpperCase();
+    state.transactions.push({
+        id: Date.now(),
+        code: code,
+        product_id: pid,
+        type: 'IN',
+        purpose: 'Supplier Delivery',
+        quantity: qty,
+        ref: ref,
+        party: supp,
+        handler: state.currentRole.toUpperCase(),
+        date: new Date().toLocaleString(),
+        notes: notes
+    });
+
+    saveState();
+    renderAll();
+    showToast("success", `Stock-In successful! Added ${qty} units of '${prod.name}'. Current stock: ${prod.quantity}.`);
+}
+
+// Stock-Out Select Dropdown
+function renderStockOutSelects() {
+    const select = document.getElementById('stockOutProductSelect');
+    if (!select) return;
+
+    select.innerHTML = '<option value="">-- Choose Component to Issue --</option>' + 
+        state.products.map(p => `<option value="${p.id}" data-price="${p.selling_price}" data-qty="${p.quantity}">${p.name} (${p.sku}) - Stock: ${p.quantity}</option>`).join('');
+
+    const tbody = document.getElementById('stockOutHistoryTableBody');
+    const outTx = state.transactions.filter(t => t.type === 'OUT').reverse().slice(0, 10);
+    tbody.innerHTML = outTx.map(t => `
+        <tr>
+            <td><code class="text-info small">${t.code}</code></td>
+            <td><div class="text-white small fw-medium">${getProductName(t.product_id)}</div><div class="small text-muted">${getProductSku(t.product_id)}</div></td>
+            <td><div class="small text-white">${t.purpose}</div><div class="small text-muted">${t.party || ''}</div></td>
+            <td class="text-center"><span class="badge bg-danger bg-opacity-25 text-danger">-${t.quantity}</span></td>
+            <td class="text-end text-white small">₱${(state.products.find(p => p.id == t.product_id)?.selling_price || 0).toLocaleString()}</td>
+            <td class="text-secondary small">${t.date}</td>
+        </tr>
+    `).join('');
+}
+
+function onDemoStockOutSelect(sel) {
+    const opt = sel.options[sel.selectedIndex];
+    const price = opt.getAttribute('data-price');
+    const qty = parseInt(opt.getAttribute('data-qty') || '0', 10);
+    const info = document.getElementById('demoStockOutAvailable');
+    const qtyInput = document.getElementById('stockOutQtyInput');
+
+    if (price) document.getElementById('stockOutPriceInput').value = price;
+    if (opt.value) {
+        qtyInput.max = qty;
+        if (qty <= 0) {
+            info.className = 'small mt-1 text-danger fw-bold';
+            info.innerHTML = '<i class="bi bi-x-circle me-1"></i> OUT OF STOCK (0 units). Cannot issue.';
+        } else {
+            info.className = 'small mt-1 text-info';
+            info.innerHTML = `<i class="bi bi-check-circle me-1"></i> Available in shop: <strong>${qty}</strong> units`;
+        }
+    } else {
+        info.innerHTML = '';
+        qtyInput.removeAttribute('max');
+    }
+}
+
+function handleDemoStockOut(e) {
+    e.preventDefault();
+    const pid = parseInt(document.getElementById('stockOutProductSelect').value, 10);
+    const qty = parseInt(document.getElementById('stockOutQtyInput').value, 10);
+    const price = parseFloat(document.getElementById('stockOutPriceInput').value || '0');
+    const purpose = document.getElementById('stockOutPurposeSelect').value;
+    const ref = document.getElementById('stockOutRefInput').value || 'INV-' + Date.now().toString().slice(-6);
+    const recip = document.getElementById('stockOutRecipientInput').value;
+    const notes = document.getElementById('stockOutNotesInput').value;
+
+    const prod = state.products.find(p => p.id == pid);
+    if (!prod) return;
+
+    if (qty > prod.quantity) {
+        alert(`Validation Error: Cannot issue ${qty} units. Only ${prod.quantity} units are available!`);
+        return;
+    }
+
+    prod.quantity -= qty;
+    const code = 'TXN-OUT-' + new Date().toISOString().slice(0,10).replace(/-/g,'') + '-' + Math.random().toString(36).substring(2,6).toUpperCase();
+    state.transactions.push({
+        id: Date.now(),
+        code: code,
+        product_id: pid,
+        type: 'OUT',
+        purpose: purpose,
+        quantity: qty,
+        ref: ref,
+        party: recip,
+        handler: state.currentRole.toUpperCase(),
+        date: new Date().toLocaleString(),
+        notes: notes
+    });
+
+    saveState();
+    renderAll();
+    showToast("success", `Stock-Out recorded! Issued ${qty} units of '${prod.name}'. Remaining stock: ${prod.quantity}.`);
+}
+
+// Low Stock Alert Manager
+function renderLowStock() {
+    const items = state.products.filter(p => p.quantity <= p.min_threshold);
+    const tbody = document.getElementById('lowStockTableBody');
+    if (!tbody) return;
+
+    let unitsNeeded = 0;
+    let budgetNeeded = 0;
+
+    items.forEach(p => {
+        const order = Math.max(5, (p.min_threshold * 2) - p.quantity);
+        unitsNeeded += order;
+        budgetNeeded += (order * p.unit_cost);
+    });
+
+    document.getElementById('lowStockItemsCount').innerText = items.length;
+    document.getElementById('lowStockUnitsCount').innerText = unitsNeeded.toLocaleString();
+    document.getElementById('lowStockBudgetCount').innerText = '₱' + budgetNeeded.toLocaleString(undefined, {minimumFractionDigits: 2});
+
+    if (items.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center py-5 text-secondary"><i class="bi bi-shield-check text-success display-5 d-block mb-2"></i>All components are healthy above thresholds!</td></tr>';
+        return;
+    }
+
+    const isAuditor = (state.currentRole === 'auditor');
+
+    tbody.innerHTML = items.map(p => {
+        const suggested = Math.max(5, (p.min_threshold * 2) - p.quantity);
+        const subtotal = suggested * p.unit_cost;
+
+        return `
+            <tr>
+                <td><span class="font-monospace text-info">${p.sku}</span></td>
+                <td><div class="text-white fw-semibold">${p.name}</div><div class="small text-secondary">${p.brand} &bull; ${p.location}</div></td>
+                <td><span class="badge bg-secondary bg-opacity-25 text-white">${getCategoryName(p.category_id)}</span></td>
+                <td class="text-center">${p.quantity === 0 ? '<span class="badge-status badge-out-of-stock">Depleted (0)</span>' : `<span class="badge-status badge-low-stock">${p.quantity} units</span>`}</td>
+                <td class="text-center text-secondary">${p.min_threshold}</td>
+                <td class="text-center fw-bold text-info">+${suggested} units</td>
+                <td class="text-end text-secondary">₱${p.unit_cost.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                <td class="text-end text-white fw-semibold">₱${subtotal.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                ${!isAuditor ? `<td class="text-center no-print"><button class="btn btn-sm btn-cyber-success py-1 px-3" onclick="openRestockModalFor(${p.id})"><i class="bi bi-plus-circle me-1"></i> Restock</button></td>` : ''}
+            </tr>
+        `;
+    }).join('');
+}
+
+// Transactions Audit Trail
+function renderTransactionsTable() {
+    const q = (document.getElementById('txSearchInput')?.value || '').toLowerCase().trim();
+    const type = document.getElementById('txTypeFilter')?.value || 'ALL';
+    const purpose = document.getElementById('txPurposeFilter')?.value || 'ALL';
+    const tbody = document.getElementById('transactionsTableBody');
+    if (!tbody) return;
+
+    const filtered = state.transactions.slice().reverse().filter(t => {
+        const pName = getProductName(t.product_id).toLowerCase();
+        const pSku = getProductSku(t.product_id).toLowerCase();
+        const matchQ = (t.code.toLowerCase().includes(q) || pName.includes(q) || pSku.includes(q) || (t.party || '').toLowerCase().includes(q) || (t.handler || '').toLowerCase().includes(q));
+        const matchType = (type === 'ALL' || t.type === type);
+        const matchPurpose = (purpose === 'ALL' || t.purpose === purpose);
+        return matchQ && matchType && matchPurpose;
+    });
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center py-5 text-secondary">No stock transactions match your filter criteria.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = filtered.map(t => `
+        <tr>
+            <td><code class="text-info">${t.code}</code></td>
+            <td class="text-secondary small">${t.date}</td>
+            <td><div class="text-white fw-semibold small">${getProductName(t.product_id)}</div><div class="small text-muted font-monospace">${getProductSku(t.product_id)}</div></td>
+            <td><span class="badge ${t.type === 'IN' ? 'bg-success bg-opacity-25 text-success' : 'bg-danger bg-opacity-25 text-danger'}"><i class="bi ${t.type === 'IN' ? 'bi-arrow-down-left' : 'bi-arrow-up-right'}"></i> ${t.type}</span></td>
+            <td class="text-secondary small">${t.purpose}</td>
+            <td class="text-center fw-bold ${t.type === 'IN' ? 'text-success' : 'text-danger'}">${t.type === 'IN' ? '+' : '-'}${t.quantity}</td>
+            <td class="text-secondary small"><span class="text-white">${t.party || '-'}</span>${t.ref ? `<div class="small text-muted">Ref: ${t.ref}</div>` : ''}</td>
+            <td class="text-secondary small"><i class="bi bi-person me-1"></i>${t.handler}</td>
+            <td class="text-secondary small" style="max-width: 180px;">${t.notes || '-'}</td>
+        </tr>
+    `).join('');
+}
+
+// Users Tab
+function renderUsers() {
+    const tbody = document.getElementById('demoUsersTableBody');
+    if (!tbody) return;
+
+    tbody.innerHTML = state.users.map(u => `
+        <tr>
+            <td><div class="text-white fw-semibold">${u.name}</div><div class="small text-secondary font-monospace">@${u.username}</div></td>
+            <td class="text-secondary small">${u.email}</td>
+            <td><span class="badge-role ${u.role}">${u.role}</span></td>
+            <td><span class="badge ${u.status === 'active' ? 'bg-success bg-opacity-25 text-success' : 'bg-danger bg-opacity-25 text-danger'}">${u.status}</span></td>
+            <td class="text-secondary small">${u.date}</td>
+        </tr>
+    `).join('');
+}
+
+// Quick Restock & Issue Launchers
+function openRestockModalFor(pid) {
+    switchTab('stock_in');
+    const select = document.getElementById('stockInProductSelect');
+    if (select) {
+        select.value = pid;
+        onDemoStockInSelect(select);
+    }
+}
+
+function openIssueModalFor(pid) {
+    switchTab('stock_out');
+    const select = document.getElementById('stockOutProductSelect');
+    if (select) {
+        select.value = pid;
+        onDemoStockOutSelect(select);
+    }
+}
+
+// Product Modal Handling
+function openAddProductModal() {
+    document.getElementById('demoEditProductId').value = '';
+    document.getElementById('demoProductModalTitle').innerText = 'Add Hardware Component';
+    document.getElementById('prodSku').value = '';
+    document.getElementById('prodBrand').value = '';
+    document.getElementById('prodName').value = '';
+    document.getElementById('prodCategory').value = '';
+    document.getElementById('prodLocation').value = 'Shelf A1';
+    document.getElementById('prodSpecs').value = '';
+    document.getElementById('prodCost').value = '0.00';
+    document.getElementById('prodPrice').value = '0.00';
+    document.getElementById('prodQty').value = '5';
+    document.getElementById('prodThreshold').value = '4';
+}
+
+function openEditProductModal(pid) {
+    const p = state.products.find(prod => prod.id == pid);
+    if (!p) return;
+
+    document.getElementById('demoEditProductId').value = p.id;
+    document.getElementById('demoProductModalTitle').innerText = 'Edit: ' + p.name;
+    document.getElementById('prodSku').value = p.sku;
+    document.getElementById('prodBrand').value = p.brand;
+    document.getElementById('prodName').value = p.name;
+    document.getElementById('prodCategory').value = p.category_id;
+    document.getElementById('prodLocation').value = p.location;
+    document.getElementById('prodSpecs').value = p.specifications || '';
+    document.getElementById('prodCost').value = p.unit_cost;
+    document.getElementById('prodPrice').value = p.selling_price;
+    document.getElementById('prodQty').value = p.quantity;
+    document.getElementById('prodThreshold').value = p.min_threshold;
+
+    const modal = new bootstrap.Modal(document.getElementById('demoProductModal'));
+    modal.show();
+}
+
+function handleSaveProduct(e) {
+    e.preventDefault();
+    const editId = document.getElementById('demoEditProductId').value;
+    const sku = document.getElementById('prodSku').value.trim();
+    const brand = document.getElementById('prodBrand').value.trim();
+    const name = document.getElementById('prodName').value.trim();
+    const catId = parseInt(document.getElementById('prodCategory').value, 10);
+    const loc = document.getElementById('prodLocation').value.trim();
+    const specs = document.getElementById('prodSpecs').value.trim();
+    const cost = parseFloat(document.getElementById('prodCost').value || '0');
+    const price = parseFloat(document.getElementById('prodPrice').value || '0');
+    const qty = parseInt(document.getElementById('prodQty').value || '0', 10);
+    const threshold = parseInt(document.getElementById('prodThreshold').value || '5', 10);
+
+    if (editId) {
+        const p = state.products.find(prod => prod.id == editId);
+        if (p) {
+            p.sku = sku; p.brand = brand; p.name = name; p.category_id = catId;
+            p.location = loc; p.specifications = specs; p.unit_cost = cost;
+            p.selling_price = price; p.quantity = qty; p.min_threshold = threshold;
+            showToast("success", `Updated '${name}' successfully!`);
+        }
+    } else {
+        const newId = Date.now();
+        state.products.push({
+            id: newId, sku, brand, name, category_id: catId, location: loc,
+            specifications: specs, unit_cost: cost, selling_price: price,
+            quantity: qty, min_threshold: threshold
+        });
+        showToast("success", `Added new hardware component '${name}'!`);
+    }
+
+    saveState();
+    bootstrap.Modal.getInstance(document.getElementById('demoProductModal')).hide();
+    renderAll();
+}
+
+function deleteDemoProduct(pid) {
+    const p = state.products.find(prod => prod.id == pid);
+    if (!p) return;
+    if (confirm(`Permanently delete hardware item '${p.name}' (${p.sku})?`)) {
+        state.products = state.products.filter(prod => prod.id != pid);
+        saveState();
+        renderAll();
+        showToast("warning", `Deleted '${p.name}' from inventory.`);
+    }
+}
+
+function handleSaveUser(e) {
+    e.preventDefault();
+    const name = document.getElementById('newUserName').value.trim();
+    const username = document.getElementById('newUserUsername').value.trim();
+    const email = document.getElementById('newUserEmail').value.trim();
+    const role = document.getElementById('newUserRole').value;
+
+    state.users.push({
+        id: Date.now(),
+        name: name,
+        username: username,
+        email: email,
+        role: role,
+        status: 'active',
+        date: new Date().toISOString().slice(0,10)
+    });
+
+    saveState();
+    bootstrap.Modal.getInstance(document.getElementById('demoUserModal')).hide();
+    renderUsers();
+    showToast("success", `User account '${name}' created!`);
+}
+
+// Toast helper
+function showToast(type, msg) {
+    const cont = document.getElementById('toastContainer');
+    cont.style.display = 'block';
+    cont.innerHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            <i class="bi bi-info-circle-fill me-2"></i> ${msg}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    setTimeout(() => {
+        cont.style.display = 'none';
+    }, 4000);
+}
+
+// CSV Export Helper
+function exportDemoCSV(tableId, filename) {
+    const table = document.getElementById(tableId);
+    if (!table) return;
+    let csv = [];
+    const rows = table.querySelectorAll('tr');
+
+    for (let i = 0; i < rows.length; i++) {
+        if (rows[i].style.display === 'none') continue;
+        let row = [];
+        const cols = rows[i].querySelectorAll('td, th');
+        for (let j = 0; j < cols.length; j++) {
+            if (cols[j].classList.contains('no-print') || cols[j].classList.contains('role-action-col')) continue;
+            let data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, ' ').trim();
+            data = data.replace(/"/g, '""');
+            row.push(`"${data}"`);
+        }
+        if (row.length > 0) csv.push(row.join(','));
+    }
+
+    const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+}
+
+// ==========================================================
+// Static Galaxy Cosmic Background (Clean, Calm, Motionless)
+// ==========================================================
+let galaxyCanvas, galaxyCtx;
+
+function initGalaxy() {
+    galaxyCanvas = document.getElementById('galaxyStarsCanvas');
+    if (!galaxyCanvas) return;
+    galaxyCtx = galaxyCanvas.getContext('2d');
+    renderStaticGalaxy();
+    window.addEventListener('resize', renderStaticGalaxy);
+}
+
+function renderStaticGalaxy() {
+    if (!galaxyCanvas) return;
+    const w = galaxyCanvas.width = window.innerWidth;
+    const h = galaxyCanvas.height = window.innerHeight;
+
+    // Deep space dark background base
+    galaxyCtx.fillStyle = '#030712';
+    galaxyCtx.fillRect(0, 0, w, h);
+
+    // Cosmic Nebulae (Stellar Gas Clouds)
+    const nebulae = [
+        { x: w * 0.18, y: h * 0.22, r: w * 0.45, c0: 'rgba(56, 189, 248, 0.14)', c1: 'rgba(99, 102, 241, 0.05)' },
+        { x: w * 0.82, y: h * 0.28, r: w * 0.50, c0: 'rgba(168, 85, 247, 0.14)', c1: 'rgba(236, 72, 153, 0.04)' },
+        { x: w * 0.50, y: h * 0.65, r: w * 0.55, c0: 'rgba(14, 165, 233, 0.10)', c1: 'rgba(147, 51, 234, 0.03)' },
+        { x: w * 0.20, y: h * 0.82, r: w * 0.38, c0: 'rgba(236, 72, 153, 0.07)', c1: 'transparent' },
+        { x: w * 0.85, y: h * 0.85, r: w * 0.40, c0: 'rgba(20, 184, 166, 0.08)', c1: 'transparent' }
+    ];
+
+    nebulae.forEach(n => {
+        const grad = galaxyCtx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r);
+        grad.addColorStop(0, n.c0);
+        grad.addColorStop(0.5, n.c1);
+        grad.addColorStop(1, 'transparent');
+        galaxyCtx.fillStyle = grad;
+        galaxyCtx.fillRect(0, 0, w, h);
+    });
+
+    // Static Galaxy Stars (Stationary & Crisp)
+    const STAR_COUNT = 550;
+    const colors = ['#ffffff', '#e0f2fe', '#bae6fd', '#ddd6fe', '#fef08a', '#fbcfe8'];
+
+    // Deterministic pseudo-random seed to keep the stars completely stationary
+    let seed = 12345;
+    function rand() {
+        seed = (seed * 9301 + 49297) % 233280;
+        return seed / 233280;
+    }
+
+    for (let i = 0; i < STAR_COUNT; i++) {
+        const x = rand() * w;
+        const y = rand() * h;
+        const size = rand() * 1.5 + 0.4;
+        const color = colors[Math.floor(rand() * colors.length)];
+        const alpha = rand() * 0.65 + 0.25;
+
+        galaxyCtx.save();
+        galaxyCtx.globalAlpha = alpha;
+        galaxyCtx.fillStyle = color;
+        galaxyCtx.beginPath();
+        galaxyCtx.arc(x, y, size, 0, Math.PI * 2);
+        galaxyCtx.fill();
+
+        // Subtle soft celestial corona for brighter stars
+        if (size > 1.3) {
+            galaxyCtx.globalAlpha = alpha * 0.35;
+            galaxyCtx.beginPath();
+            galaxyCtx.arc(x, y, size * 2.4, 0, Math.PI * 2);
+            galaxyCtx.fill();
+        }
+        galaxyCtx.restore();
+    }
+}
+
+// Start
+document.addEventListener('DOMContentLoaded', initApp);
+</script>
+
+</body>
+</html>
